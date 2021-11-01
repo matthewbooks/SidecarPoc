@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: i360-proto
+  labels:
+    app: i360
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: i360
+  template:
+    metadata:
+      labels:
+        app: i360
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: 10Mi
+          limits:
+            memory: 64Mi
+            cpu: 10m
+      - name: tools
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 81
+        resources:
+          requests:
+            memory: 10Mi
+          limits:
+            memory: 64Mi
+            cpu: 10m
+        volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  1;
+    events {
+      worker_connections  10240;
+    }
+    http {
+      server {
+          listen       81;
+          server_name  localhost;
+          location / {
+            root   /usr/share/nginx/html; #Change this line
+            index  index.html index.htm;
+        }
+      }
+    }
