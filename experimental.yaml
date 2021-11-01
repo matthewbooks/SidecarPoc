@@ -25,6 +25,11 @@ spec:
           limits:
             memory: 64Mi
             cpu: 10m
+        volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
       - name: tools
         image: nginx:1.14.2
         ports:
@@ -36,7 +41,7 @@ spec:
             memory: 64Mi
             cpu: 10m
         volumeMounts:
-            - name: nginx-conf
+            - name: tools-conf
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
               readOnly: true
@@ -47,11 +52,39 @@ spec:
             items:
               - key: nginx.conf
                 path: nginx.conf
+        - name: tools-conf
+          configMap:
+            name: tools-conf
+            items:
+              - key: nginx.conf
+                path: nginx.conf
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-conf
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  1;
+    events {
+      worker_connections  10240;
+    }
+    http {
+      server {
+          listen       80;
+          server_name  localhost;
+          location / {
+            set $upstream http://127.0.0.1:81;
+            proxy_pass   $upstream;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tools-conf
 data:
   nginx.conf: |
     user nginx;
