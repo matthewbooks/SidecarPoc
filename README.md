@@ -37,3 +37,9 @@ Then, once the DNS tools pod is up and running, you'll be presented with a comma
 curl <SERVICE_IP>:80
 ```
 And you should see the response of the test HTML ("This is the sidecar poc")
+
+## Important Notes
+In order to ensure that the pod starts up correctly, we need to ensure that the containers within are started properly and in the correct order. With this in mind:
+* The order in which you list your containers is also the order in which Kubernetes will start the containers sequentially
+* The readiness probe on the 'tools' container serves an important function - it ensures that Kubernetes will only move on to setting up the next container in the list (in this case, the 'nginx' container) once it is ready to receive traffic
+* As we are sure that the 'tools' container exists and is running, when we set up the 'nginx' container, we can directly reference the container by 127.0.0.1:81 - before the readiness probe and appropriate container spec ordering, this didn't work as the upstream didn't yet exist and would kill the container
