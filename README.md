@@ -22,18 +22,18 @@ NAME                                            READY   STATUS      RESTARTS   A
 i360-proto-54f8d44bb7-4ztn8                     2/2     Running     0          77m
 ```
 
-You can get the IP address for the pod within your container via `kubectl`:
+As we've set up a service, you will now be able to hit the pod via the service IP. You can get the IP address for the service via `kubectl`:
 ```sh
-kubectl describe <POD_NAME>
+kubectl get svc i360-service
 ```
 
-From there, to prove that you are redirected to the 'tools' container, you can hit the container on port 80 and confirm that the test HTML ("This is the sidecar poc") is displayed from the 'tools' container. An easy way to do this is by spinning up a DNS tools container in your k8s cluster:
+From there, to prove that you are redirected to the 'tools' container, you can hit the service on port 80 and confirm that the test HTML ("This is the sidecar poc") is displayed from the 'tools' container. An easy way to do this is by spinning up a DNS tools container in your k8s cluster:
 ```sh
 kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 ```
 
 Then, once the DNS tools pod is up and running, you'll be presented with a command prompt. Curl the container as below:
 ```sh
-curl <CONTAINER_IP>:80
+curl <SERVICE_IP>:80
 ```
 And you should see the response of the test HTML ("This is the sidecar poc")

@@ -120,3 +120,15 @@ data:
     }
   index.html: |
     <html><h1>This is the sidecar poc</h1></html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: i360-service
+spec:
+  selector:
+    app: i360
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
